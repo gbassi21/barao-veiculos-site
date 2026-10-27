@@ -1,0 +1,142 @@
+/* Sistema de movimento da Barão (princípios do GUIA-DE-CRIACAO).
+   Só transform/opacity. Nada fica escondido sem a classe html.js-motion,
+   que é colocada pelo script do <head>: se o JavaScript falhar, tudo aparece. */
+:root{
+  --ease-out:cubic-bezier(.2,.8,.2,1);      /* chegadas */
+  --ease-sheet:cubic-bezier(.32,.72,0,1);   /* painéis e menu: desliza como folha */
+  --ease-pop:cubic-bezier(.3,1.4,.5,1);     /* SÓ confirmações (etiqueta de filtro, "+" do FAQ) */
+}
+
+/* 1. Resposta imediata ao toque (80ms) */
+.button:active,.ui-hover:active,.category-row a:active{transform:scale(.97)!important;transition-duration:.08s!important}
+.menu-toggle:active,.gallery-prev:active,.gallery-next:active{transform:scale(.9)!important;transition-duration:.08s!important}
+.button{transition:background .18s var(--ease-out),border-color .18s var(--ease-out),transform .18s var(--ease-out)}
+
+/* 2. Entrada ao rolar, escalonada (só com JS) */
+.js-motion .rv{opacity:0;translate:0 18px;transition:opacity .6s var(--ease-out),translate .6s var(--ease-out);transition-delay:var(--d,0s)}
+.js-motion .rv.in{opacity:1;translate:0 0}
+
+/* 3. Fotos de veículos nunca ficam escondidas: só um brilho de fundo enquanto carregam */
+.car-photo,.thumb,.editorial>img,.iris-photo{background-image:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);background-size:220% 100%;background-color:#e9edf0}
+.car-photo.loading,.thumb.loading,.iris-photo.loading{animation:shimmer 1.3s linear infinite}
+@keyframes shimmer{from{background-position:120% 0}to{background-position:-120% 0}}
+
+/* Botão do WhatsApp: sem a bolinha branca de preenchimento */
+.ui-hover.whatsapp>.ui-hover-fill{background:transparent}
+.ui-hover.whatsapp:is(:hover,:focus-visible)>.ui-hover-fill{background:var(--action-fill)}
+
+.ui-hover.whatsapp>.ui-hover-label,.ui-hover.whatsapp>.ui-hover-active{gap:10px;justify-content:center}
+.ui-hover.whatsapp>.ui-hover-label{transform:none}
+.ui-hover.whatsapp svg.whatsapp-icon{width:22px;height:22px;flex:0 0 22px}
+
+/* 4. Cartão de veículo: o zoom fica só na foto, o cartão sobe sem brigar com a entrada */
+.car-card .car-photo>img{transition:transform .65s var(--ease-out)}
+.car-card:hover img{transform:none}
+.car-card:hover .car-photo>img{transform:scale(1.045)}
+.car-card:active{transform:translateY(-2px) scale(.995);transition-duration:.08s}
+.card-arrow{transition:transform .3s var(--ease-out),background .2s}
+.car-card:hover .card-arrow{transform:translate(2px,-2px)}
+
+/* 5. Cabeçalho de vidro ao rolar */
+header{transition:background .25s var(--ease-out),box-shadow .25s var(--ease-out),border-color .25s var(--ease-out)}
+header.scrolled{background:rgba(255,255,255,.88);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);box-shadow:0 6px 24px rgba(20,40,80,.08);border-bottom-color:transparent}
+header nav a:after{transition:width .25s var(--ease-out)}
+
+/* 6. Menu do celular: desce como folha em vez de aparecer de uma vez */
+@media(max-width:760px){
+  header nav{display:grid!important;gap:15px;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-8px);
+    transition:opacity .2s var(--ease-out),transform .35s var(--ease-sheet),visibility 0s linear .35s}
+  header nav.open{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition-delay:0s}
+  header nav a{opacity:0;transform:translateY(-6px);transition:opacity .3s var(--ease-out),transform .3s var(--ease-out)}
+  header nav.open a{opacity:1;transform:none;transition-delay:.05s}
+  header nav.open a:nth-child(2){transition-delay:.08s}header nav.open a:nth-child(3){transition-delay:.11s}header nav.open a:nth-child(4){transition-delay:.14s}header nav.open a:nth-child(5){transition-delay:.17s}
+}
+
+/* 7. FAQ: o "+" gira e a resposta sobe 8px */
+.faq summary span{transition:transform .3s var(--ease-pop);flex-shrink:0}
+.faq details[open] summary span{transform:rotate(45deg)}
+.faq details[open]>p{animation:tabIn .35s var(--ease-out)}
+@keyframes tabIn{from{opacity:0;transform:translateY(8px)}}
+
+/* 8. Galeria do veículo: troca com esmaecimento, contador e zoom ao clicar */
+.gallery>img{transition:opacity .18s var(--ease-out),transform .35s var(--ease-out)}
+.gallery>img.fading{opacity:.15}
+.gallery-prev,.gallery-next{transition:opacity .2s,transform .2s var(--ease-out),background .2s}
+@media(hover:hover) and (pointer:fine){
+  .gallery>img{cursor:zoom-in}
+  .gallery.zoom>img{transform:scale(2);transform-origin:var(--zx,50%) var(--zy,50%);cursor:zoom-out;transition:opacity .18s var(--ease-out),transform .35s var(--ease-out)}
+  .gallery-prev,.gallery-next{opacity:0}
+  .gallery:hover .gallery-prev,.gallery:hover .gallery-next,.gallery-prev:focus-visible,.gallery-next:focus-visible{opacity:1}
+  .gallery.zoom .gallery-prev,.gallery.zoom .gallery-next{opacity:0;pointer-events:none}
+}
+.gallery-count{transition:opacity .2s}
+.thumb{transition:border-color .25s var(--ease-out),transform .25s var(--ease-out)}
+.thumb:active{transform:scale(.94)}
+
+/* 9. Etiquetas dos filtros ativos (surgem com pulinho) */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:7px 8px 7px 14px;border-radius:20px;background:#e6f0f6;color:#0d3a57;font-size:12px;font-weight:600;line-height:1.3;border:1px solid #c9dce8;animation:chipIn .38s var(--ease-pop) both}
+.chip span{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#fff;font-size:13px;line-height:1;transition:background .18s,color .18s}
+.chip:hover span{background:#0d3a57;color:#fff}
+.chip:active{transform:scale(.95);transition:transform .08s}
+@keyframes chipIn{from{opacity:0;transform:scale(.8)}}
+
+/* 10. Barra fixa de compra no celular (página do veículo) */
+.buy-bar{display:none}
+@media(max-width:760px){
+  .buy-bar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;align-items:center;justify-content:space-between;gap:14px;padding:10px 6% calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid #dce5ea;box-shadow:0 -8px 24px rgba(20,40,80,.1);transform:translateY(110%);visibility:hidden;transition:transform .35s var(--ease-sheet),visibility 0s linear .35s}
+  .buy-bar.show{transform:none;visibility:visible;transition-delay:0s}
+  .buy-bar strong{font-size:20px;letter-spacing:-.04em;line-height:1.1;display:block}
+  .buy-bar small{display:block;font-size:11px;color:#5a6b77;line-height:1.3;max-width:34vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .buy-bar .whatsapp{flex:1;max-width:210px;min-height:46px}
+  body:has(.buy-bar) footer{padding-bottom:calc(25px + 78px)}
+}
+
+/* 11. Entrada do herói ao abrir a página */
+.js-motion .hero-copy>*{animation:rise .7s var(--ease-out) both}
+.js-motion .hero-copy>:nth-child(2){animation-delay:.07s}.js-motion .hero-copy>:nth-child(3){animation-delay:.14s}.js-motion .hero-copy>:nth-child(4){animation-delay:.21s}.js-motion .hero-copy>:nth-child(5){animation-delay:.28s}.js-motion .hero-copy>:nth-child(6){animation-delay:.35s}
+.js-motion .hero-visual .hero-photo-caption{animation:rise .8s var(--ease-out) .35s both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}}
+
+/* 12. Troca de página: o conteúdo faz cross-fade e o cabeçalho fica parado */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.22s;animation-timing-function:var(--ease-out)}
+header{view-transition-name:site-header}
+
+/* 13. Reduzir movimento e transparência */
+@media(prefers-reduced-motion:reduce){
+  .js-motion .rv{translate:none!important;transition:opacity .2s!important}
+  .js-motion .hero-copy>*,.js-motion .hero-visual .hero-photo-caption{animation:none!important}
+  .car-photo.loading,.thumb.loading,.iris-photo.loading{animation:none!important}
+  .gallery.zoom>img{transform:none!important}
+  .buy-bar{transition:none!important}
+  ::view-transition-old(root),::view-transition-new(root){animation:none}
+}
+@media(prefers-reduced-transparency:reduce){
+  header.scrolled{background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none}
+  .buy-bar{background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none}
+}
+
+/* 14. Caixas de seleção (filtros, busca, cadastro): lista moderna em vez da lista antiga do sistema.
+   Navegadores sem appearance:base-select mantêm a lista nativa, só com a seta nova. */
+@supports (appearance:base-select){
+  select,select::picker(select){appearance:base-select}
+  select{cursor:pointer;transition:border-color .18s var(--ease-out),box-shadow .18s var(--ease-out)}
+  select:hover{border-color:#9db8c8}
+  select:focus-visible,select:open{border-color:#096aa7;box-shadow:0 0 0 3px rgba(9,106,167,.18);outline:none}
+  .quick-search select:focus-visible,.quick-search select:open{box-shadow:none}
+  select::picker-icon{content:"";width:8px;height:8px;margin-left:auto;flex:none;border-right:2px solid #4f6575;border-bottom:2px solid #4f6575;transform:rotate(45deg) translate(-2px,-2px);transition:transform .25s var(--ease-out)}
+  select:open::picker-icon{transform:rotate(225deg) translate(-2px,-2px)}
+  select::picker(select){margin:6px 0 0;padding:6px;border:1px solid #dbe5ea;border-radius:12px;background:#fff;box-shadow:0 18px 40px rgba(20,40,80,.16);max-height:min(300px,40dvh);position-try-fallbacks:none;overflow-y:auto;
+    opacity:0;transform:translateY(-6px) scale(.98);transform-origin:top;
+    transition:opacity .18s var(--ease-out),transform .22s var(--ease-out),overlay .22s allow-discrete,display .22s allow-discrete}
+  select:open::picker(select){opacity:1;transform:none}
+  @starting-style{select:open::picker(select){opacity:0;transform:translateY(-6px) scale(.98)}}
+  select option{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;color:#173247;cursor:pointer;transition:background .12s}
+  select option:hover,select option:focus-visible{background:#eaf2f7;outline:none}
+  select option:checked{background:#e1eff7;color:#0b5e93;font-weight:700}
+  select option::checkmark{order:1;margin-left:auto;color:#096aa7}
+}
+@supports not (appearance:base-select){
+  select,.quick-search select{appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%234f6575' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:12px}
+}
